@@ -1,16 +1,10 @@
-FROM debian:buster-slim
+FROM alpine:3.12
 
-ARG  snapcast_version=0.20.0
-ARG TARGETARCH
+RUN apk update
+RUN apk add ca-certificates
+RUN apk add wget
+RUN apk add snapcast-server
 
-RUN  apt-get update \
-  && apt-get install -y wget ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
-RUN  wget https://github.com/badaix/snapcast/releases/download/v${snapcast_version}/snapserver_${snapcast_version}-1_$(echo $TARGETARCH | sed 's/arm/armhf/g').deb
-RUN  dpkg -i snapserver_${snapcast_version}-1_$(echo $TARGETARCH | sed 's/arm/armhf/g').deb \
-  ;  apt-get update \
-  && apt-get -f install -y \
-  && rm -rf /var/lib/apt/lists/*
 RUN /usr/bin/snapserver -v
 COPY snapserver.conf /etc/snapserver.conf
 COPY index.html /www/index.html

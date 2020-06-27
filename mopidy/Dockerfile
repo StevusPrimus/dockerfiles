@@ -13,6 +13,7 @@ RUN wget -q -O - https://apt.mopidy.com/mopidy.gpg | apt-key add - && \
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    mopidy \
     tzdata \
     sudo \
     build-essential \
@@ -38,7 +39,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install \
-    Mopidy \
     Mopidy-MPD \
     Mopidy-Local \
     Mopidy-TuneIn \
@@ -46,15 +46,14 @@ RUN pip3 install \
     Mopidy-Spotify \
     Mopidy-Iris
 
-RUN mkdir -p /mopidy
 RUN touch /IS_CONTAINER
-RUN useradd -ms /bin/bash mopidy
-RUN sh -c 'echo "mopidy ALL=NOPASSWD: /usr/local/lib/python3.7/dist-packages/mopidy_iris/system.sh" >> /etc/sudoers'
-RUN sed -i 's+--config .*mopidy.conf+--config /mopidy/mopidy.conf+g' /usr/local/lib/python3.7/dist-packages/mopidy_iris/system.sh
 
 COPY mopidy.conf /mopidy_default.conf
+COPY mopidy.conf /etc/mopidy/mopidy.conf
 COPY mopidy.sh /usr/local/bin/mopidy.sh
 
+RUN systemctl enable mopidy
+
 EXPOSE 6600 6680
-USER mopidy
+USER root
 ENTRYPOINT ["/usr/local/bin/mopidy.sh"]
